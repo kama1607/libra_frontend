@@ -1,32 +1,71 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
-  </div>
+  <v-app>
+    <v-app-bar
+      app
+      dark
+    >
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+    </v-app-bar>
+
+    <v-navigation-drawer
+        app
+        v-model="drawer"
+        temporary
+    >
+      <v-list
+          nav
+          dense>
+        <v-list-item-group
+            v-model="group"
+            active-class="deep-purple--text text--accent-4">
+
+          <!-- <v-list-item link :to="{name: 'Home'}">
+            <v-list-item-title>Главная страница</v-list-item-title>
+          </v-list-item> -->
+
+          <v-list-item link :to="{name: 'Accounting'}">
+          <v-list-item-title>Движение книжного фонда</v-list-item-title>
+          </v-list-item>
+
+          <v-list-item link :to="{name: 'books'}">
+            <v-list-item-title>Книги</v-list-item-title>
+          </v-list-item>  
+
+          <v-list-item link :to="{name: 'students'}">
+            <v-list-item-title>
+              Ученики
+            </v-list-item-title>
+          </v-list-item>
+          
+
+          <v-list-item link :to="{name: 'Authors'}">
+            <v-list-item-title>Авторы</v-list-item-title>
+          </v-list-item>
+        </v-list-item-group>
+      </v-list>
+    </v-navigation-drawer>
+
+    <v-main>
+      <router-view/>
+    </v-main>
+
+  </v-app>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script>
 
-#nav {
-  padding: 30px;
-}
+export default {
+  name: 'App',
 
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
+  data: () => ({
+    drawer: false,
+    group: null,
+  }),
 
-#nav a.router-link-exact-active {
-  color: #42b983;
-}
-</style>
+  watch: {
+    group () {
+      this.drawer = false
+    },
+  },
+};
+</script>
