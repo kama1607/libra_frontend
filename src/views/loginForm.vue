@@ -8,9 +8,17 @@
               <v-toolbar-title>Авторизация</v-toolbar-title>
             </v-toolbar>
             <v-card-text>
-              <v-form>
-                <v-text-field v-model="login" label="Логин" type="text" />
+              <v-form ref="form" v-model="valid" lazy-validation>
+                <v-text-field 
+                :rules="loginRule"
+                required
+                v-model="login" 
+                label="Логин" 
+                type="text" 
+                />
                 <v-text-field
+                  :rules="passRule"
+                  required
                   v-model="password"
                   label="Пароль"
                   type="password"
@@ -19,7 +27,11 @@
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="primary" @click="onLogin">ВОЙТИ</v-btn>
+              <v-btn 
+              color="primary" 
+              @click="onLogin"
+              :disabled="!valid"
+              >ВОЙТИ</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
@@ -32,19 +44,35 @@
 import token from '@/api/Manager/TokenManager'
 
 export default {
-  name: "Login",
+  name: "loginForm",
   props: {
     source: String,
   },
   data: () => ({
+    valid: true,
     login: "",
+    loginRule: [
+      v => !!v || "Заполнение логина обязательно",
+      v => (v && v.length > 4) || "Логин должен содержать не менее 4 символов"
+    ],
     password: "",
+    passRule: [
+      p => !!p || "Заполнение пароля обязательно",
+      p => (p && p.length > 4) || "Пароль должен содержать не менее 4 символов"
+    ]
   }),
+
   methods: {
      onLogin() {
-        token.save('dsfsdjfsfd')
-        this.$router.push({name: 'Accounting'})
-     }
+        this.$refs.form.validate();
+        this.getToken()
+     },
+     
+    getToken(){
+      token.save('dsfsdjfsfd')
+      this.$router.push({name: 'Accounting'})
+    }
+
   }
 };
 </script>

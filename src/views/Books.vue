@@ -1,10 +1,7 @@
 <template>
   <v-container fluid>
     <v-row>
-      <!-- <v-col :cols="6">
-        <v-btn @click="exportToExcel">Экспорт</v-btn>
-      </v-col> -->
-
+      
       <v-col :cols="6">
         <v-text-field label="Поиск" v-model="search" />
       </v-col>
@@ -21,6 +18,10 @@
       </v-col>
       <v-col :cols="2">
         <v-btn color="primary" @click="getBooks">Очистить </v-btn>
+      </v-col>
+
+      <v-col :cols="3">
+        <v-btn color="primary" @click="getReport">Сформировать список книг на списание </v-btn>
       </v-col>
 
       <v-col :cols="12">
@@ -54,7 +55,7 @@
                         <v-container>
                           <v-row>
                             <v-col cols="12">
-                              <v-select
+                              <v-autocomplete
                                 v-model="editedItem.author_id"
                                 :items="authors"
                                 item-value="id"
@@ -186,7 +187,7 @@
 
 <script>
 import { axiosInstance } from "@/api/Axios";
-import XSLX from "xlsx";
+import fileSave from "file-saver"
 
 export default {
   data: () => ({
@@ -258,7 +259,15 @@ export default {
   },
 
   methods: {
-    //xlsx
+    //report 
+    async getReport(){
+        await axiosInstance.post("/book-list")
+        .then(() => axiosInstance.get("/give-list", {responseType: "blob"}))
+        .then((res) => {
+          const pdfBlob = new Blob([res.data], {type: "application/pdf"});
+          saveAs(pdfBlob, "naSpisanie.pdf")
+        })
+      },
 
     async getBooks() {
       await axiosInstance.get("/books").then(({ data }) => {

@@ -11,12 +11,10 @@
           label="Статус"
           max-width="500px"
         />
-        <v-btn color="primary" @click="getAccounts">Очистить </v-btn>
+        <v-btn class="mr-10" color="primary" @click="getAccounts">Очистить </v-btn>
     
-      <v-col :cols="3">
         <v-btn color="primary" @click="getReport">Сформировать список должников </v-btn>
-      </v-col>
-
+      
       </v-col>
 
       <v-col :cols="12">
@@ -53,15 +51,14 @@
                         <v-container>
                           <v-row>
                             <v-col cols="12">
-                              
-                              <v-select
+                              <v-autocomplete
                                 v-model="editedItem.book_id"
-                                :items="books"
-                                item-value="id"
                                 item-text="name_book"
+                                item-value="id"
                                 label="Название книги"
-                                outlined
                                 max-width="500px"
+                                :items="books"
+                                outlined
                               />
 
                               <v-select
@@ -75,7 +72,7 @@
                                 max-width="500px"
                               />
 
-                              <v-select
+                              <v-autocomplete
                                 v-model="editedItem.student_id"
                                 :items="students"
                                 item-value="id"
@@ -85,7 +82,6 @@
                                 max-width="500px"
                               />
 
-                              <!-- Data Picker-->
                               <v-menu
                                 v-model="menu2"
                                 :close-on-content-click="false"
@@ -190,6 +186,7 @@
             </v-data-table>
           </v-card-text>
         </v-card>
+
       </v-col>
     </v-row>
   </v-container>
@@ -220,7 +217,6 @@ export default {
     accountings: [],
     books: [],
     authors: [],
-    //classes: [],
     students: [],
     dialog: false,
     dialogDelete: false,
@@ -230,6 +226,7 @@ export default {
       {text: "Автор", value:"book.author.name"},
       { text: "Книга", value: "book.name_book" },
       { text: "Класс", value: "student.class.number"},
+      {value: "student.letter"},
       { text: "Ученик", value: "student.FIO" },
       { text: "Дата выдачи", value: "date_of_issue" },
       { text: "Статус книги", value: "status_book" },
@@ -243,8 +240,7 @@ export default {
       student_id: "",
       date_of_issue: "",
       status_book: "",
-      //return_date: "",
-      //notes: "",
+      //return_date: "" 
     },
   }),
 
@@ -280,8 +276,6 @@ export default {
         this.accountings = data
       })
     },
-
-
 
     async getAccounts() {
       await axiosInstance.get("/accountings").then(({ data }) => {
@@ -360,6 +354,7 @@ export default {
       const isAdd = this.editedIndex == -1;
       if (isAdd) {
         this.addAccount(this.editedItem);
+        
       } else {
         this.editAccount(this.editedItem);
 

@@ -36,6 +36,13 @@ const routes = [
     path: "/login",
     name: "Login",
     component: () => import ("../views/loginForm.vue")
+  },
+
+  //404 route
+  {
+    path: "*",
+    name: "404",
+    component: () => import("../views/Error404")
   }
 
 ]
