@@ -4,7 +4,7 @@
       <v-col :cols="6">
         <v-text-field label="Поиск" v-model="search" />
       </v-col>
-      
+
       <v-col :cols="8">
         <v-select
           v-model="choosenClassId"
@@ -20,12 +20,6 @@
       </v-col>
       <v-col :cols="2">
         <v-btn color="warning" @click="getStudents"> Очистить фильтр </v-btn>
-      </v-col>
-      <v-col :cols="3">
-        <v-btn color="primary" @click="report">Сформировать отчёт списка должников</v-btn>
-         <v-btn class="mt-2" color="primary" link @click="showReport">
-          Посмотреть отчёт списка должников
-        </v-btn>
       </v-col>
       <v-col :cols="12">
         <v-card outlined elevation="4">
@@ -117,14 +111,46 @@
                   </v-dialog>
                 </v-toolbar>
               </template>
-
               <template v-slot:item.actions="{ item }">
-                <v-icon small class="mr-2" @click="editItem(item)">
+                <v-icon class="mr-2" @click="editItem(item)">
                   mdi-pencil
                 </v-icon>
-                <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
+                <v-icon class="mr-2" @click="deleteItem(item)">
+                  mdi-delete
+                </v-icon>
+                <v-icon @click="showAccouting(item)"> mdi-book-account </v-icon>
               </template>
             </v-data-table>
+
+            <v-dialog v-if="dialogStudent" v-model="dialogStudentAccouting">
+              <v-card elevation="4" outlined>
+                <v-card-title> Ученик: {{ dialogStudent.FIO }} </v-card-title>
+                <v-card-text>
+                  Класс: 
+                  {{ dialogStudent.class.number
+                    }}{{ dialogStudent.letter }}  
+                </v-card-text>
+              
+                <v-col :cols="6">
+                   <v-btn 
+                   :disabled="dialogStudentData ==''"
+                   color="primary"
+                  @click="getReportAboutStudent"
+                   >Сформировать отчёт</v-btn> 
+                </v-col>
+
+                <v-card-text>
+                  <v-data-table
+                    v-if="dialogStudentData.length > 0"
+                    :items-per-page="5"
+                    :items="dialogStudentData"
+                    :headers="dialogStudentHeaders"
+                  />
+                  
+                  <span v-else> ЭТОТ УЧЕНИК ЕЩЁ НЕ БРАЛ КНИГИ </span>
+                </v-card-text>
+              </v-card>
+            </v-dialog>
           </v-card-text>
         </v-card>
       </v-col>
@@ -134,7 +160,7 @@
 
 <script>
 import { axiosInstance } from "@/api/Axios";
-import fileSave from "file-saver"
+import fileSave from "file-saver";
 import {
   fetchStudents,
   fetchStudentsByClassId,
@@ -143,6 +169,23 @@ import {
 export default {
   data: () => ({
     students: [],
+
+    dialogStudent: null,
+    dialogStudentData: [],
+    dialogStudentAccouting: false,
+
+    dialogStudentHeaders: [
+      { text: "Автор", value: "book.author.name" },
+      { text: "Книга", value: "book.name_book" },
+      { text: "Год издания", value: "book.year_of_public" },
+      { text: "ISBN", value: "book.isbn" },
+      { text: "Цена", value: "book.price" },
+      { text: "Категория", value: "book.category"},
+      { text: "Статус", value: "status_book" },
+      { text: "Дата выдачи", value: "date_of_issue" },
+      { text: "Дата получения", value: "return_date" },
+    ],
+
     dialog: false,
     dialogDelete: false,
     headers: [
@@ -153,7 +196,7 @@ export default {
     ],
     classes: [],
     search: "",
-    editedIndex: -1,
+    editedIndex: -1, 
     choosenClassId: null,
     editedItem: {
       FIO: "",
@@ -183,25 +226,35 @@ export default {
   },
 
   methods: {
+     async showAccouting(item) {
+      await axiosInstance
+        .get(`/student-accouting/${item.id}`)
+        .then(({ data }) => {
+          this.dialogStudentData = data;
+          this.dialogStudentAccouting = true;
+          this.dialogStudent = item;
+          console.dir(data);
+        });
+    },
     
-    async report(){
-      await axiosInstance.post(`/create-pdf`)
+    async getReportAboutStudent(){
+        await axiosInstance.post(`/student-form/${this.dialogStudent.id}`)
+        .then(() => axiosInstance.get("/give-student-form", {responseType: "blob"}))
+        .then((res) => {
+          const pdfBlob = new Blob([res.data], {type: "application/pdf"})
+          saveAs(pdfBlob, "studentForm")
+        })
     },
 
-    async showReport(){
-      await axiosInstance.get(`/fetch-pdf`, {responseType: 'blob'}).then(res => {
-          const pdfBlob = new Blob([res.data], { type: 'application/pdf' });
-          saveAs(pdfBlob, 'report.pdf')
-      })
-    },
 
     async getStudents() {
-      await fetchStudents().then((s) => this.students = s);
+      await fetchStudents().then((s) => (this.students = s));
     },
 
     async filterStudentsByClassId(id) {
-      await axiosInstance.get(`/students-by-class/${id}`)
-      .then(({data}) => this.students = data.students)
+      await axiosInstance
+        .get(`/students-by-class/${id}`)
+        .then(({ data }) => (this.students = data.students));
     },
 
     async getClass() {
