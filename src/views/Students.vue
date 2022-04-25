@@ -19,7 +19,7 @@
         />
       </v-col>
       <v-col :cols="2">
-        <v-btn color="warning" @click="getStudents"> Очистить фильтр </v-btn>
+        <v-btn color="warning" @click="clearFilter"> Очистить фильтр </v-btn>
       </v-col>
       <v-col :cols="12">
         <v-card outlined elevation="4">
@@ -335,6 +335,12 @@ export default {
         console.log(err);
       }
     },
+
+    async clearFilter(){
+      this.choosenClassId = null;
+      this.getStudents();
+    }
+
   },
 };
 </script>

@@ -17,7 +17,7 @@
         />
       </v-col>
       <v-col :cols="2">
-        <v-btn color="primary" @click="getBooks">Очистить </v-btn>
+        <v-btn color="primary" @click="clearFilter">Очистить </v-btn>
       </v-col>
 
       <v-col :cols="3">
@@ -293,6 +293,7 @@ export default {
       this.editedIndex = this.books.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
+      console.log(item)
     },
 
     deleteItem(item) {
@@ -347,7 +348,7 @@ export default {
 
     async editBook(book) {
       try {
-        await axiosInstance.put(`/books/${book.id}`, book);
+        await axiosInstance.put(`/books/${book.id}`, this.editedItem);
         await this.getBooks();
       } catch (err) {
         console.dir(err);
@@ -362,6 +363,11 @@ export default {
         console.log(err);
       }
     },
+
+    async clearFilter(){
+      this.filterStatus = null;
+      this.getBooks();
+    }
   },
 };
 </script>

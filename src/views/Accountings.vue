@@ -11,7 +11,7 @@
           label="Статус"
           max-width="500px"
         />
-        <v-btn class="mr-10" color="primary" @click="getAccounts">Очистить </v-btn>
+        <v-btn class="mr-10" color="primary" @click="clear">Очистить </v-btn>
     
         <v-btn color="primary" @click="getReport">Сформировать список должников </v-btn>
       
@@ -62,7 +62,7 @@
                               />
 
                               <v-select
-                                v-model="class_id"
+                                v-model="editedItem.class_id"
                                 :items="classes"
                                 item-value="id"
                                 item-text="number"
@@ -214,10 +214,12 @@ export default {
     ],
     menu2: false,
     menu3: false,
+
     accountings: [],
     books: [],
     authors: [],
     students: [],
+
     dialog: false,
     dialogDelete: false,
     search: "",
@@ -294,6 +296,7 @@ export default {
       await fetchStudentsByClassId(id).then(s => this.students = s)
     },
 
+  
     async getBooks() {
       await axiosInstance.get("/books").then(({ data }) => {
         this.books = data
@@ -319,6 +322,7 @@ export default {
       this.editedIndex = this.accountings.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
+      console.log(item)
     },
 
     deleteItem(item) {
@@ -357,7 +361,6 @@ export default {
         
       } else {
         this.editAccount(this.editedItem);
-
         Object.assign(this.accountings[this.editedIndex], this.editedItem);
       }
       this.close();
@@ -373,13 +376,24 @@ export default {
       }
     },
 
+    // async editAccount(account){
+    //   try{
+    //     await axiosInstance
+    //     .put(`/accountings/${account.id}`, account);
+    //     await this.getAccounts();
+    //   }catch(err){
+    //     console.log(err)
+    //   }
+    // },     
+    //Old code
     async editAccount(account) {
-      await axiosInstance
-        .put(`/accountings/${account.id}`, account)
-        .then(({ data }) => {
-          console.log(data);
-        })
-        .catch((err) => console.dir(err));
+      try{
+        await axiosInstance
+        .put(`/accountings/${account.id}`, this.editedItem)
+        await this.getAccounts();
+      }catch(err){
+        console.log(err)
+      }
     },
 
     async deleteAccount(id) {
@@ -390,6 +404,12 @@ export default {
         console.log(err);
       }
     },
+
+    async clear(){
+      this.filterStatus = null;
+      this.getAccounts();
+      
+    }
   },
 
   async beforeMount() {

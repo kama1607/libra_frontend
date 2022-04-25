@@ -169,7 +169,6 @@ export default {
 
     save() {
       const isAdd = this.editedIndex == -1; // -1 = добавление, 0 - редактирование 
-
       if (isAdd) {
         this.addAuthor(this.editedItem)
       } else {
@@ -177,7 +176,6 @@ export default {
 
         Object.assign(this.authors[this.editedIndex], this.editedItem);
       }
-
       this.close();
     },
 
