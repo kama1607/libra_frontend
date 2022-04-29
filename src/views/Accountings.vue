@@ -14,7 +14,13 @@
         <v-btn class="mr-10" color="primary" @click="clear">Очистить </v-btn>
     
         <v-btn color="primary" @click="getReport">Сформировать список должников </v-btn>
-      
+
+        <v-btn
+        color="primary"
+        class="ma-2"
+        dark
+        @click="dialogReport = true"
+        >Сформировать список должников по классам</v-btn>
       </v-col>
 
       <v-col :cols="12">
@@ -184,6 +190,48 @@
                 <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
               </template>
             </v-data-table>
+
+
+      <v-dialog
+        v-model="dialogReport"
+        max-width="500px"
+      >
+        <v-card>
+          <v-card-title>
+            Сформировать список должников по классам
+          </v-card-title>
+          <v-card-text>
+            <v-col :cols="5">
+              <v-select
+              v-model="classForReport"
+              :items="reportClasses"
+              label="Выберите класс"
+              
+            ></v-select>
+
+            <v-btn
+            color="primary"
+            dark
+            @click="reportsList"
+            >
+              Сформировать отчет
+            </v-btn>
+            </v-col>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn
+              color="primary"
+              text
+              @click="dialogReport = false, classForReport = null"
+            >
+              Закрыть
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+
+
           </v-card-text>
         </v-card>
 
@@ -200,8 +248,13 @@ import fileSave from "file-saver"
 
 export default {
   data: () => ({
+
+    dialogReport: false,
+
     class_id: null,
     filterStatus: null,
+    classForReport: null,
+
     statuses: [
       {
         value: 200,
@@ -212,6 +265,55 @@ export default {
         text: "ПОЛУЧЕНО",
       },
     ],
+
+    reportClasses: [
+      {
+        value: 1,
+        text: "1"
+      },
+      {
+        value: 2,
+        text: "2"
+      },
+      {
+        value: 3,
+        text: "3"
+      },
+      {
+        value: 4,
+        text: "4"
+      },
+      {
+        value: 5,
+        text: "5"
+      },
+      {
+        value: 6,
+        text: "6"
+      },
+      {
+        value: 7,
+        text: "7"
+      },
+      {
+        value: 8,
+        text: "8"
+      },
+      {
+        value: 9,
+        text: "9"
+      },
+      {
+        value: 10,
+        text: "10"
+      },
+      {
+        value: 11,
+        text: "11"
+      },
+    ],
+
+
     menu2: false,
     menu3: false,
 
@@ -311,6 +413,15 @@ export default {
     async getReport(){
         await axiosInstance.post("/account-list")
         .then(() => axiosInstance.get("/give-account", {responseType: "blob"}))
+        .then((res) => {
+          const pdfBlob = new Blob([res.data], {type: "application/pdf"});
+          saveAs(pdfBlob, "studentsList.pdf")
+        })
+    },
+
+    async reportsList(){
+        await axiosInstance.post(`/accounting-by-class/${this.reportClasses}`)
+        .then(() => axiosInstance.get("/give-accounts", {responseType: "blob"}))
         .then((res) => {
           const pdfBlob = new Blob([res.data], {type: "application/pdf"});
           saveAs(pdfBlob, "studentsList.pdf")
