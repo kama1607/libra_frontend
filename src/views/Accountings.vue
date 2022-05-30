@@ -11,16 +11,43 @@
           label="Статус"
           max-width="500px"
         />
-        <v-btn class="mr-10" color="primary" @click="clear">Очистить </v-btn>
+        <v-btn class="mr-10" color="primary" @click="clear">Сбросить фильтр </v-btn>
     
-        <v-btn color="primary" @click="getReport">Сформировать список должников </v-btn>
-
         <v-btn
         color="primary"
         class="ma-2"
         dark
         @click="dialogReport = true"
         >Сформировать список должников по классам</v-btn>
+
+        <v-menu
+            v-model="menu4"
+            :close-on-content-click="false"
+            :nudge-right="40"
+            transition="scale-transition"
+            offset-y
+            min-width="auto">
+          <template v-slot:activator="{ on, attrs }">
+          <v-text-field
+          v-model="dateRangeText"
+          label="Выберите год обучения"
+          prepend-icon="mdi-calendar"
+          readonly
+          v-bind="attrs"
+          v-on="on"/>
+          </template>
+          <v-date-picker
+          v-model="diapason"
+          range
+          />
+          </v-menu>
+          <v-btn  color="primary" class="mr-10" @click="getAccountByDates">
+              Получить
+          </v-btn>
+          <v-btn color="primary" @click="clearYear">
+              Очистить
+          </v-btn>
+          
       </v-col>
 
       <v-col :cols="12">
@@ -204,9 +231,10 @@
             <v-col :cols="5">
               <v-select
               v-model="classForReport"
-              :items="reportClasses"
+              :items="classes"
               label="Выберите класс"
-              
+              item-value="id"
+              item-text="number"
             ></v-select>
 
             <v-btn
@@ -248,11 +276,12 @@ import fileSave from "file-saver"
 
 export default {
   data: () => ({
-
+      
     dialogReport: false,
 
     class_id: null,
     filterStatus: null,
+
     classForReport: null,
 
     statuses: [
@@ -265,57 +294,13 @@ export default {
         text: "ПОЛУЧЕНО",
       },
     ],
-
-    reportClasses: [
-      {
-        value: 1,
-        text: "1"
-      },
-      {
-        value: 2,
-        text: "2"
-      },
-      {
-        value: 3,
-        text: "3"
-      },
-      {
-        value: 4,
-        text: "4"
-      },
-      {
-        value: 5,
-        text: "5"
-      },
-      {
-        value: 6,
-        text: "6"
-      },
-      {
-        value: 7,
-        text: "7"
-      },
-      {
-        value: 8,
-        text: "8"
-      },
-      {
-        value: 9,
-        text: "9"
-      },
-      {
-        value: 10,
-        text: "10"
-      },
-      {
-        value: 11,
-        text: "11"
-      },
-    ],
+    
+    diapason: [],
 
 
     menu2: false,
     menu3: false,
+    menu4: false,
 
     accountings: [],
     books: [],
@@ -352,6 +337,10 @@ export default {
     formTitle() {
       return this.editedIndex === -1 ? "Добавление записи" : "Изменение";
     },
+    dateRangeText(){
+      return this.diapason
+    }
+
   },
 
   created() {
@@ -420,13 +409,29 @@ export default {
     },
 
     async reportsList(){
-        await axiosInstance.post(`/accounting-by-class/${this.reportClasses}`)
+        await axiosInstance.post(`/accounting-by-class/${this.classForReport}`)
         .then(() => axiosInstance.get("/give-accounts", {responseType: "blob"}))
         .then((res) => {
           const pdfBlob = new Blob([res.data], {type: "application/pdf"});
           saveAs(pdfBlob, "studentsList.pdf")
         })
     },
+
+
+    async getAccountByDates(){
+      const dtRange = {
+        start: this.diapason[0],
+        end: this.diapason[1]
+      }
+      await axiosInstance.post("/accountsbydates", dtRange)
+      .then(({ data }) => {
+        this.accountings = data
+      })
+      .catch(err => {
+        console.log(err);
+      })
+    },
+
 
     //Add, Edit, Delete functions
     editItem(item) {
@@ -520,6 +525,10 @@ export default {
       this.filterStatus = null;
       this.getAccounts();
       
+    }, 
+    async clearYear(){
+      this.diapason = null;
+      this.getAccounts();
     }
   },
 
