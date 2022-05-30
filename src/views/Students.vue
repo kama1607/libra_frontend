@@ -109,6 +109,21 @@
                       </v-card-actions>
                     </v-card>
                   </v-dialog>
+
+                   <v-dialog v-model="dialogError" max-width="500px">
+                  <v-card>
+                   <v-card-title class="text-h6"
+                        >ОШИБКА! ТАКОЙ УЧЕНИК УЖЕ ИМЕЕТСЯ</v-card-title
+                      >
+                      <v-card-actions>
+                        <v-spacer />
+                        <v-btn color="blue darken-1" text @click="dialogError = false"
+                          >ОК</v-btn
+                        >
+                        <v-spacer/>  
+                        </v-card-actions>
+                    </v-card>
+                  </v-dialog>  
                 </v-toolbar>
               </template>
               <template v-slot:item.actions="{ item }">
@@ -170,6 +185,7 @@ export default {
   data: () => ({
     students: [],
 
+    dialogError: false,
     dialogStudent: null,
     dialogStudentData: [],
     dialogStudentAccouting: false,
@@ -315,6 +331,7 @@ export default {
         await this.getStudents();
       } catch (err) {
         console.log(err);
+        this.dialogError = true;
       }
     },
 
@@ -323,6 +340,7 @@ export default {
         .put(`/students/${student.id}`, this.editedItem)
         .then(({ data }) => {
           console.log(data);
+          this.getStudents()
         })
         .catch((err) => console.dir(err));
     },
