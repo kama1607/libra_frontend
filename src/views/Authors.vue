@@ -36,7 +36,7 @@
                             <v-col cols="12">
                               <v-text-field
                                 max-width="400px"
-                                v-model="editedItem.name"
+                                v-model.trim="editedItem.name"
                                 label="ФИО автора"
                               />
                             </v-col>
@@ -49,7 +49,11 @@
                         <v-btn color="blue darken-1" text @click="close">
                           Отменить
                         </v-btn>
-                        <v-btn color="blue darken-1" text @click="save">
+                        <v-btn color="blue darken-1" 
+                        text 
+                        @click="save"
+                        :disabled="editedItem.name ==''"
+                        >
                           Сохранить
                         </v-btn>
                       </v-card-actions>
@@ -76,6 +80,23 @@
                       </v-card-actions>
                     </v-card>
                   </v-dialog>
+
+                  <v-dialog v-model="dialogError" max-width="500px">
+                  <v-card>
+                   <v-card-title class="text-h5"
+                        >ОШИБКА! ТАКОЙ АВТОР УЖЕ ИМЕЕТСЯ</v-card-title
+                      >
+                      <v-card-actions>
+                        <v-spacer />
+                        <v-btn color="blue darken-1" text @click="dialogError = false"
+                          >ОК</v-btn
+                        >
+                        <v-spacer/>  
+                        </v-card-actions>
+                    </v-card>
+                  </v-dialog>  
+
+
                 </v-toolbar>
               </template>
 
@@ -85,6 +106,7 @@
                 </v-icon>
                 <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
               </template>
+
             </v-data-table>
           </v-card-text>
         </v-card>
@@ -98,6 +120,8 @@ import { axiosInstance } from "@/api/Axios";
 
 export default {
   data: () => ({
+    dialogError: false,
+
     dialog: false,
     dialogDelete: false,
     headers: [
@@ -180,18 +204,24 @@ export default {
     },
 
     async editAuthor(author) {
-      await axiosInstance.put(`/authors/${author.id}`, author).then(({ data }) => {
-        console.log(data)
-      }).catch(e => console.dir(e));
+      try{
+        await axiosInstance.put(`/authors/${author.id}`, this.editedItem)
+        await this.fetchAuthors()
+      }catch(err){
+        console.log(err)
+      }
     },
     
     async addAuthor(){
       try{
         await axiosInstance.post("/authors", this.editedItem);
-        await this.fetchAuthors()
-      }catch(err){
-          console.log(err)
+        await this.fetchAuthors();
+      }catch(error){
+        console.log(error);
+        this.dialogError = true;
       }
+        
+
     },
 
     async fetchAuthors() {
