@@ -348,7 +348,8 @@ export default {
 
     async editBook(book) {
       try {
-        await axiosInstance.put(`/books/${book.id}`, this.editedItem);
+        await axiosInstance
+        .put(`/books/${book.id}`, this.editedItem);
         await this.getBooks();
       } catch (err) {
         console.dir(err);
