@@ -9,7 +9,7 @@ class TokenManager {
     save(token) {
         localStorage.setItem(this.tokenKey, token)
     }
-
+    
     /**
      * Получить сохраненный токен.
      * @return string|null

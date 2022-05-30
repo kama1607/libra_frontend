@@ -30,7 +30,7 @@
               <v-btn 
               color="primary" 
               @click="onLogin"
-              :disabled="!valid"
+              :disabled="!valid || (login == null) || (password == null)"
               >ВОЙТИ</v-btn>
             </v-card-actions>
           </v-card>

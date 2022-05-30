@@ -55,6 +55,11 @@
                         <v-container>
                           <v-row>
                             <v-col cols="12">
+                              <v-icon class="mb-5"
+                              @click="addAuthor">
+                                mdi-account-plus
+                              </v-icon>
+
                               <v-autocomplete
                                 v-model="editedItem.author_id"
                                 :items="authors"
@@ -148,6 +153,45 @@
                     </v-card>
                   </v-dialog>
 
+                  <v-dialog v-model="authorAdd">
+                    <v-card>
+                      <v-card-title>
+                        <span class="text-h5"> Добавить автора</span>
+                      </v-card-title>
+
+                      <v-card-text>
+                        <v-container>
+                          <v-row>
+                            <v-col cols="12">
+                              <v-text-field
+                                max-width="400px"
+                                v-model.trim="Item.name"
+                                label="ФИО автора"
+                              />
+                            </v-col>
+                          </v-row>
+                        </v-container>
+                      </v-card-text>
+
+                      <v-card-actions>
+                        <v-spacer />
+                        <v-btn color="blue darken-1" text @click="authorAdd = false">
+                          Отменить
+                        </v-btn>
+                        <v-btn color="blue darken-1" 
+                        text 
+                        @click="saveAuthor"
+                        :disabled="editedItem.name ==''"
+                        >
+                          Сохранить
+                        </v-btn>
+                      </v-card-actions>
+                    </v-card>
+                  </v-dialog>
+
+
+
+
                   <v-dialog v-model="dialogDelete" max-width="500px">
                     <v-card>
                       <v-card-title class="text-h5"
@@ -223,10 +267,14 @@ export default {
       { text: "Действия", value: "actions", sortable: false },
     ],
     authors: [],
+    authorAdd: false,
     search: "",
     //filter
     filterStatus: null,
     editedIndex: -1,
+    Item: {
+      name: ""
+    },
     editedItem: {
       author_id: "",
       name_book: "",
@@ -356,6 +404,25 @@ export default {
       }
     },
   
+    // async addAuthor(){
+    //   this.authorAdd = true;
+    //   this.saveAuthor()
+    // },
+
+    // async saveAuthor(){
+    //   try{
+            
+    //     if(this.Item != ""){
+    //       await axiosInstance.post("/authors", this.Item);
+    //       this.authorAdd = false
+    //       this.getAuthors()
+    //     }
+    //   }catch(error){
+    //     console.log(error);
+    //   }
+    // },
+
+
     async deleteBook(id) {
       try {
         await axiosInstance.delete(`/books/${id}`);
